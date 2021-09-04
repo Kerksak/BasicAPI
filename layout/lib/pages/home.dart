@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:layout/pages/detail.dart';
+import 'package:http/http.dart'as http; //package สำหรับ Link File Json มาจาก Githup
+import 'dart:async'; //package สำหรับ Link File Json มาจาก Githup
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -20,18 +22,19 @@ class _HomePageState extends State<HomePage> {
       body: Padding(
         //wrap ด้วย padding เพื่อให้ Container มีระยะห่างจากขอบจอ
         padding: const EdgeInsets.all(20),
-        child: FutureBuilder( builder: (context, snapshot) {//EP9
-            var data = json.decode(snapshot.data.toString());//[{คอมพิวเตอร์คืออะไร},{},{}]
+        child: FutureBuilder( builder: (context,AsyncSnapshot snapshot) {//EP9
+            // var data = json.decode(snapshot.data.toString());//[{คอมพิวเตอร์คืออะไร},{},{}]
             return ListView.builder(
               itemBuilder: (BuildContext context, int index){
-                return MyBox(data[index]['title'], data[index]['subtitle'], data[index]['image_url'],data[index]['detail']);
+                return MyBox(snapshot.data[index]['title'], snapshot.data[index]['subtitle'], snapshot.data[index]['image_url'],snapshot.data[index]['detail']);
 
               },
-              itemCount: data.length,);
+              itemCount: snapshot.data.length,);
 
 
         },
-        future: DefaultAssetBundle.of(context).loadString('assets/data.json'),
+        future: getData(),
+        // future: DefaultAssetBundle.of(context).loadString('assets/data.json'),
         //ผลลัพธ์ที่ได้จะเอาข้อมูลใน json มาแสดง เหมือน copy มาวางเลย (อย่าลืมไป set asset ใน pubspec ด้วย)
 
         )
@@ -96,4 +99,15 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+
+  Future getData() async {
+    //https://raw.githubusercontent.com/Kerksak/BasicAPI/main/data.json
+    var url = Uri.https('raw.githubusercontent.com','Kerksak/BasicAPI/main/data.json');
+    var response = await http.get(url);
+    var result = json.decode(response.body);
+    return result;
+  }  
+
+
 }
